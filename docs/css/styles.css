@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'MyCustomFont'; 
-    src: url('../SanJiLuRongTi-2.ttf') format('truetype');
+    src: url('../ttf/SanJiLuRongTi-2.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     unicode-range: U+4E00-9FFF, U+3400-4DBF, U+20000-2A6DF, U+2A700-2B73F, 

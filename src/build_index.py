@@ -11,7 +11,7 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 import chromadb
 
 # ======================== 配置区 ========================
-DOC_DIR = "./database/input"
+DOC_DIR = "./raw-docs/input"
 PERSIST_DIR = "./database/vector"
 COLLECTION_NAME = "smps_knowledge"
 EMBED_MODEL = "qwen3-embedding:8b"

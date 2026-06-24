@@ -105,6 +105,10 @@ function buildSystemPrompt() {
 
 // ─── 路由 ───
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', projectRoot: PROJECT_ROOT });
 });
