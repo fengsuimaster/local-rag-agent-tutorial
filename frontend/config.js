@@ -23,6 +23,9 @@ export const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6
 // API Key 强制从环境变量读取，无默认值（避免泄漏）
 export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || null;
 
+// RAG 检索服务地址（Flask query_api.py，默认 5050）
+export const RAG_API_URL = `http://127.0.0.1:${process.env.RAG_PORT || 5050}`;
+
 // 对话历史最大保留轮数
 export const MAX_HISTORY_ROUNDS = 40;
 

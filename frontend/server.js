@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer } from 'http';
 
-import { PORT, ANTHROPIC_MODEL, MAX_HISTORY_ROUNDS, MAX_TOKENS } from './config.js';
+import { PORT, ANTHROPIC_MODEL, MAX_HISTORY_ROUNDS, MAX_TOKENS, RAG_API_URL } from './config.js';
 import { buildSystemPrompt } from './system-prompt.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -34,14 +34,46 @@ function getSession(sessionId) {
   return sessions.get(sessionId);
 }
 
+// ─── RAG 检索 ───
+async function fetchContext(question) {
+  try {
+    const resp = await fetch(`${RAG_API_URL}/retrieve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, top_k: 5 }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.context || null;
+  } catch (err) {
+    console.warn('[RAG] 检索服务不可达:', err.message);
+    return null;
+  }
+}
+
+async function checkRagStatus() {
+  try {
+    const resp = await fetch(`${RAG_API_URL}/health`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!resp.ok) return 'unhealthy';
+    const data = await resp.json();
+    return data.status === 'ok' ? 'ok' : 'unhealthy';
+  } catch {
+    return 'unreachable';
+  }
+}
+
 // ─── 路由 ───
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'templates', 'index.html'));
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', projectRoot: PROJECT_ROOT });
+app.get('/api/health', async (req, res) => {
+  const ragStatus = await checkRagStatus();
+  res.json({ status: 'ok', projectRoot: PROJECT_ROOT, ragStatus });
 });
 
 app.post('/api/session', (req, res) => {
@@ -94,14 +126,24 @@ app.post('/api/chat', async (req, res) => {
   try {
     const sdk = await getAgentSdk();
 
-    // 构建对话历史
+    // ── RAG 检索：从本地知识库获取上下文 ──
+    send({ type: 'status', text: '检索知识库中...' });
+    const context = await fetchContext(message);
+    const userMessage = context
+      ? `参考资料：\n${context}\n\n问题：${message}`
+      : message;
+    if (!context) {
+      console.warn('[RAG] 未获取到上下文，使用无检索模式');
+    }
+
+    // 构建对话历史（原始消息入历史，检索上下文不入）
     const recentMessages = session.slice(-MAX_HISTORY_ROUNDS);
     let prompt = '';
     for (const msg of recentMessages) {
       if (msg.role === 'user') prompt += `用户: ${msg.content}\n`;
       else if (msg.role === 'assistant') prompt += `助手: ${msg.content}\n`;
     }
-    prompt += `用户: ${message}`;
+    prompt += `用户: ${userMessage}`;
 
     send({ type: 'status', text: '思考中...' });
 
