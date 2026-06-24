@@ -1,0 +1,8 @@
+llama-index-core
+llama-index-readers-file
+llama-index-embeddings-ollama
+llama-index-vector-stores-chroma
+chromadb
+Flask
+requests
+sentence-transformers
