@@ -10,17 +10,13 @@ from llama_index.core.node_parser import MarkdownNodeParser, SentenceSplitter
 from llama_index.embeddings.ollama import OllamaEmbedding
 import chromadb
 
-# ======================== 配置区 ========================
-DOC_DIR = "./raw-docs/input"
-PERSIST_DIR = "./database/vector"
-COLLECTION_NAME = "smps_knowledge"
-EMBED_MODEL = "qwen3-embedding:8b"
+from config import (
+    DOC_DIR, PERSIST_DIR, COLLECTION_NAME, EMBED_MODEL,
+    MAX_NODE_LENGTH, CHUNK_SIZE, CHUNK_OVERLAP, BATCH_SIZE,
+)
 
-MAX_NODE_LENGTH = 1200
-CHUNK_SIZE = 800
-CHUNK_OVERLAP = 100
-BATCH_SIZE = 10
-# =======================================================
+# ======================== 构建专属配置 ========================
+# 如需覆盖共享配置中的值，在此处赋值即可
 
 def print_node_stats(nodes, title="节点统计"):
     lengths = [len(n.text) for n in nodes]

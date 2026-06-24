@@ -10,12 +10,7 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 import chromadb
 
-# ============ 配置 ============
-PERSIST_DIR = "./database/vector"
-COLLECTION_NAME = "smps_knowledge"
-EMBED_MODEL = "qwen3-embedding:8b"
-SIMILARITY_TOP_K = 3
-# =============================
+from config import PERSIST_DIR, COLLECTION_NAME, EMBED_MODEL, SIMILARITY_TOP_K
 
 def load_index():
     if not os.path.exists(PERSIST_DIR):
