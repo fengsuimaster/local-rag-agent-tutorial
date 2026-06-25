@@ -48,16 +48,13 @@ function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s;
 
 document.addEventListener('DOMContentLoaded', () => {
   loadFromStorage();
-  loadSettings();
+  loadTheme();
   document.getElementById('message-input').focus();
   document.getElementById('message-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
-  });
-  document.getElementById('settings-modal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeSettings();
   });
 });
 
@@ -91,12 +88,27 @@ function saveToStorage() {
   } catch (e) {}
 }
 
-function loadSettings() {
-  try {
-    const s = JSON.parse(localStorage.getItem('chat_settings') || '{}');
-    if (s.model) document.getElementById('setting-model').value = s.model;
-    if (s.api) document.getElementById('setting-api').value = s.api;
-  } catch (e) {}
+function loadTheme() {
+  const saved = localStorage.getItem('chat_theme');
+  const theme = saved || 'light';
+  applyTheme(theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem('chat_theme', next);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const sunIcon = document.getElementById('theme-icon-sun');
+  const moonIcon = document.getElementById('theme-icon-moon');
+  if (sunIcon && moonIcon) {
+    sunIcon.style.display = theme === 'dark' ? 'block' : 'none';
+    moonIcon.style.display = theme === 'dark' ? 'none' : 'block';
+  }
 }
 
 function appendMessage(role, content, animate, id) {
@@ -310,8 +322,7 @@ async function sendMessage() {
       try { localStorage.setItem('chat_sessionId', sessionId); } catch(e) {}
     } catch { showStatus('无法连接服务器', true); isStreaming=false; updateSendButton(); return; }
   }
-  const settings = JSON.parse(localStorage.getItem('chat_settings')||'{}');
-  const model = settings.model || 'claude-sonnet-4-6';
+  const model = 'claude-sonnet-4-6';
   const userMsgId = appendMessage('user', message);
   messages.push({ role:'user', content:message, id:userMsgId }); saveToStorage();
   const assistId = `msg_${Date.now()}_assist`; currentStreamBubble = assistId;
@@ -376,13 +387,7 @@ function scrollToBottom() {
 function updateSendButton() { const b=document.getElementById('send-btn'); b.disabled=isStreaming; }
 function showStatus(t,e) { const bar=document.getElementById('status-bar'); bar.textContent=t; bar.classList.add('visible'); bar.classList.toggle('error',e); }
 function hideStatus() { const bar=document.getElementById('status-bar'); bar.classList.remove('visible','error'); bar.textContent=''; }
-function openSettings() { document.getElementById('settings-modal').classList.add('open'); }
-function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
-function saveSettings() {
-  localStorage.setItem('chat_settings', JSON.stringify({ model: document.getElementById('setting-model').value, api: document.getElementById('setting-api').value }));
-  closeSettings(); showStatus('设置已保存'); setTimeout(hideStatus,2500);
-}
-document.getElementById('btn-settings').addEventListener('click', openSettings);
+document.getElementById('btn-theme-toggle').addEventListener('click', toggleTheme);
 
 function clearHistory() {
   messages=[]; sessionId=null; ragResultsCache = {};
@@ -401,7 +406,6 @@ function clearHistory() {
         <button class="hint-chip" onclick="sendHint('帮我分析boost电路的纹波')">Boost纹波分析</button>
       </div>
     </div>`;
-  closeSettings();
 }
 document.getElementById('btn-clear').addEventListener('click', ()=>{ if(confirm('清空当前对话？')) clearHistory(); });
 
