@@ -23,7 +23,7 @@
 <div id="app">
   <!-- 极简 Header -->
   <header id="header">
-    <div class="header-left">
+    <div class="header-left" id="header-left" title="对话目录" onclick="toggleToc()">
       <span class="logo-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
@@ -40,6 +40,15 @@
       </button>
     </div>
   </header>
+
+  <!-- 对话目录侧栏 -->
+  <aside class="toc-panel" id="toc-panel">
+    <div class="toc-header">
+      <span>对话目录</span>
+      <button class="toc-close" onclick="toggleToc()">✕</button>
+    </div>
+    <div class="toc-list" id="toc-list"></div>
+  </aside>
 
   <!-- 对话区域（无卡片包裹，与背景融合） -->
   <main id="chat-area">

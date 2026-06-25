@@ -99,11 +99,16 @@ def retrieve():
     except (TypeError, ValueError):
         top_k = SIMILARITY_TOP_K
 
+    print(f"[retrieve] question='{question[:60]}...' top_k={top_k}", flush=True)
+
     try:
         retriever = index.as_retriever(similarity_top_k=top_k)
         nodes = retriever.retrieve(question)
     except Exception as e:
+        print(f"[retrieve] FAILED: {e}", flush=True)
         return jsonify({"error": f"检索失败: {e}"}), 500
+
+    print(f"[retrieve] OK — {len(nodes)} results", flush=True)
 
     results = []
     for node in nodes:
@@ -140,6 +145,17 @@ def find_available_port(start_port):
 if __name__ == "__main__":
     print("=" * 50)
     print("RAG Retrieval Service — starting...")
+    print(f"  Embed model: {EMBED_MODEL}")
+    print(f"  Vector store: {PERSIST_DIR}")
+
+    # 检查 Ollama 连通性
+    import urllib.request
+    try:
+        resp = urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=5)
+        print(f"  Ollama: connected")
+    except Exception as e:
+        print(f"[FAIL] Ollama not reachable at http://127.0.0.1:11434 — is it running?")
+        sys.exit(1)
 
     # 加载索引
     try:

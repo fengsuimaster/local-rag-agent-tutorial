@@ -36,19 +36,28 @@ function getSession(sessionId) {
 
 // ─── RAG 检索 ───
 async function fetchContext(question) {
+  const target = `${RAG_API_URL}/retrieve`;
   try {
-    const resp = await fetch(`${RAG_API_URL}/retrieve`, {
+    const resp = await fetch(target, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question, top_k: 5 }),
       signal: AbortSignal.timeout(8000),
     });
-    if (!resp.ok) return null;
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.warn(`[RAG] HTTP ${resp.status} from ${target}: ${text.slice(0,200)}`);
+      return { context: null, results: [] };
+    }
     const data = await resp.json();
-    return data.context || null;
+    if (!data.context) {
+      console.warn('[RAG] Empty context in response');
+      return { context: null, results: [] };
+    }
+    return { context: data.context, results: data.results || [] };
   } catch (err) {
-    console.warn('[RAG] 检索服务不可达:', err.message);
-    return null;
+    console.warn(`[RAG] Cannot reach ${target}: ${err.message}`);
+    return { context: null, results: [] };
   }
 }
 
@@ -128,12 +137,15 @@ app.post('/api/chat', async (req, res) => {
 
     // ── RAG 检索：从本地知识库获取上下文 ──
     send({ type: 'status', text: '检索知识库中...' });
-    const context = await fetchContext(message);
-    const userMessage = context
-      ? `参考资料：\n${context}\n\n问题：${message}`
-      : message;
+    const { context, results } = await fetchContext(message);
+    // RAG 上下文注入 system prompt，用户消息保持原样
+    const userMessage = message;
     if (!context) {
       console.warn('[RAG] 未获取到上下文，使用无检索模式');
+    } else {
+      console.log(`[RAG] 上下文已注入 (${context.length} chars, ${results.length} 条结果)`);
+      // ★ 将检索结果发送给前端展示
+      send({ type: 'rag_results', results });
     }
 
     // 构建对话历史（原始消息入历史，检索上下文不入）
@@ -147,11 +159,12 @@ app.post('/api/chat', async (req, res) => {
 
     send({ type: 'status', text: '思考中...' });
 
-    const stream = sdk.query({
+
+	    const stream = sdk.query({
       prompt,
       options: {
         cwd: PROJECT_ROOT,
-        systemPrompt: buildSystemPrompt(),
+        systemPrompt: buildSystemPrompt(context),
         permissionMode: 'auto',
         maxTokens: MAX_TOKENS,
         model: model || ANTHROPIC_MODEL,

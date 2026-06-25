@@ -2,6 +2,49 @@ let sessionId = null;
 let isStreaming = false;
 let currentStreamBubble = null;
 let messages = [];
+let ragResultsCache = {};  // { assistMsgId: results[] }
+
+// ─── 对话目录 ───
+function toggleToc() {
+  const panel = document.getElementById('toc-panel');
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) {
+    panel.classList.remove('open');
+  } else {
+    refreshTocList();
+    panel.classList.add('open');
+  }
+}
+
+function refreshTocList() {
+  const list = document.getElementById('toc-list');
+  const userMsgs = messages.filter(m => m.role === 'user');
+  if (userMsgs.length === 0) {
+    list.innerHTML = '<div class="toc-empty">暂无对话记录</div>';
+    return;
+  }
+  list.innerHTML = userMsgs.map((m, i) => {
+    const text = (m.content || '').replace(/\n/g, ' ').slice(0, 60);
+    const escaped = escapeHtml(text);
+    return `<button class="toc-item" onclick="scrollToMessage('${m.id}');event.stopPropagation();">
+      <span class="toc-num">${i + 1}.</span>${escaped}${(m.content||'').length > 60 ? '...' : ''}
+    </button>`;
+  }).join('');
+}
+
+function scrollToMessage(msgId) {
+  // 收起目录
+  document.getElementById('toc-panel').classList.remove('open');
+  // 高亮跳转
+  const el = document.getElementById(msgId);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // 高亮闪烁
+  el.classList.add('msg-flash');
+  setTimeout(() => el.classList.remove('msg-flash'), 1600);
+}
+
+function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
 document.addEventListener('DOMContentLoaded', () => {
   loadFromStorage();
@@ -27,12 +70,23 @@ function loadFromStorage() {
       scrollToBottom();
     }
     sessionId = localStorage.getItem('chat_sessionId');
+    // 恢复 RAG 检索结果卡片
+    const savedRag = localStorage.getItem('chat_ragResults');
+    if (savedRag) {
+      ragResultsCache = JSON.parse(savedRag);
+      Object.entries(ragResultsCache).forEach(([assistId, results]) => {
+        if (results && results.length > 0) {
+          restoreRagCard(assistId, results);
+        }
+      });
+    }
   } catch (e) {}
 }
 
 function saveToStorage() {
   try {
     localStorage.setItem('chat_messages', JSON.stringify(messages.map(m => ({ role: m.role, content: m.content, id: m.id }))));
+    localStorage.setItem('chat_ragResults', JSON.stringify(ragResultsCache));
     if (sessionId) localStorage.setItem('chat_sessionId', sessionId);
   } catch (e) {}
 }
@@ -102,6 +156,112 @@ function finishToolStatus(id) {
   setTimeout(() => { if (div.parentNode) div.remove(); }, 3000);
 }
 
+// 构建 RAG 卡片 DOM（纯函数，不插入）
+function buildRagCard(results) {
+  const container = document.createElement('div');
+  container.className = 'rag-results';
+  const header = document.createElement('div');
+  header.className = 'rag-header collapsed';
+  header.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> 检索到 <strong>${results.length}</strong> 条参考资料 <span class="rag-hint">点击展开</span>`;
+  header.onclick = () => {
+    const body = container.querySelector('.rag-body');
+    if (body.style.display === 'none') {
+      body.style.display = 'block';
+      header.classList.remove('collapsed');
+    } else {
+      body.style.display = 'none';
+      header.classList.add('collapsed');
+    }
+  };
+  container.appendChild(header);
+  const body = document.createElement('div');
+  body.className = 'rag-body';
+  body.style.display = 'none';
+  results.forEach((r, i) => {
+    const item = document.createElement('div');
+    item.className = 'rag-item';
+    const scorePercent = Math.round(r.score * 100);
+    let scoreClass = 'rag-score-low';
+    if (scorePercent >= 80) scoreClass = 'rag-score-high';
+    else if (scorePercent >= 65) scoreClass = 'rag-score-mid';
+
+    const cleanSection = (r.section || '')
+      .replace(/\r/g, '')
+      .split('/')
+      .map(s => s.trim())
+      .filter(Boolean)
+      .join(' › ');
+
+    let cleanText = (r.text || '').replace(/\r/g, '');
+    cleanText = cleanText.replace(/^\[.+?\]\s*/g, '');
+    cleanText = cleanText.replace(/^#{2,6}\s+/gm, '');
+    cleanText = cleanText.replace(/\*\*(.+?)\*\*/g, '$1');
+    cleanText = cleanText.replace(/\*(.+?)\*/g, '$1');
+    cleanText = cleanText.replace(/\n{3,}/g, '\n\n').trim();
+    const snippet = cleanText.replace(/\n/g, ' ').slice(0, 200);
+
+    item.innerHTML = `
+      <div class="rag-item-header">
+        <span class="rag-item-index">${i + 1}</span>
+        <span class="rag-item-file">${escapeHtml(r.file_name || '未知')}</span>
+        <span class="rag-item-score ${scoreClass}">${scorePercent}%</span>
+      </div>
+      ${cleanSection ? `<div class="rag-item-section">${escapeHtml(cleanSection)}</div>` : ''}
+      <div class="rag-item-text">${escapeHtml(snippet)}${cleanText.length > 200 ? '...' : ''}</div>
+    `;
+    body.appendChild(item);
+  });
+  container.appendChild(body);
+  return container;
+}
+
+// 将 RAG 卡片插入到最后一个用户消息之后
+function insertRagCard(container) {
+  const chatContent = document.getElementById('chat-content');
+  const userMsgs = chatContent.querySelectorAll('.message.user');
+  const lastUserMsg = userMsgs[userMsgs.length - 1];
+  if (lastUserMsg) {
+    lastUserMsg.insertAdjacentElement('afterend', container);
+  } else {
+    chatContent.appendChild(container);
+  }
+}
+
+function showRagResults(results) {
+  console.log('[RAG-UI] showRagResults called, results:', results?.length);
+  if (!results || results.length === 0) { console.log('[RAG-UI] no results, returning'); return; }
+  try {
+    const welcome = document.getElementById('welcome');
+    if (welcome) welcome.style.display = 'none';
+    if (currentStreamBubble) {
+      ragResultsCache[currentStreamBubble] = results;
+    }
+    const container = buildRagCard(results);
+    insertRagCard(container);
+    console.log('[RAG-UI] card inserted successfully');
+  } catch(e) {
+    console.error('[RAG-UI] build/insert failed:', e);
+    // 降级：至少插入一个简单的提示条
+    const el = document.createElement('div');
+    el.className = 'tool-status';
+    el.innerHTML = `检索到 ${results.length} 条参考资料（卡片渲染失败：${e.message}）`;
+    document.getElementById('chat-content').appendChild(el);
+  }
+  scrollToBottom();
+}
+
+// 刷新页面后恢复 RAG 卡片
+function restoreRagCard(assistId, results) {
+  const container = buildRagCard(results);
+  const chatContent = document.getElementById('chat-content');
+  const assistBubble = document.getElementById(assistId);
+  if (assistBubble && assistBubble.parentNode === chatContent) {
+    chatContent.insertBefore(container, assistBubble);
+  } else {
+    chatContent.appendChild(container);
+  }
+}
+
 function renderMarkdown(text) {
   if (!text) return '';
   const mathBlocks = [];
@@ -147,7 +307,7 @@ async function sendMessage() {
       if (!res.ok) throw new Error();
       const d = await res.json();
       sessionId = d.sessionId;
-      localStorage.setItem('chat_sessionId', sessionId);
+      try { localStorage.setItem('chat_sessionId', sessionId); } catch(e) {}
     } catch { showStatus('无法连接服务器', true); isStreaming=false; updateSendButton(); return; }
   }
   const settings = JSON.parse(localStorage.getItem('chat_settings')||'{}');
@@ -174,15 +334,21 @@ async function sendMessage() {
         const data = line.slice(6); if (data === '[DONE]') continue;
         try {
           const ev = JSON.parse(data);
+          console.log('[SSE] event type:', ev.type);
           switch (ev.type) {
             case 'text': fullContent += ev.text; if(bubble){bubble.innerHTML=renderMarkdown(fullContent);bubble.querySelectorAll('pre').forEach(addCopyButton);} scrollToBottom(); break;
+            case 'rag_results':
+              try {
+                showRagResults(ev.results);
+              } catch(e) { console.error('[RAG-UI] showRagResults error:', e); }
+              break;
             case 'tool_start': activeToolDiv = appendToolStatus(ev.name, ev.input); break;
             case 'tool_end': if(activeToolDiv){finishToolStatus(activeToolDiv);activeToolDiv=null;} break;
             case 'status':  break;
-            case 'done': hideStatus(); if(ev.sessionId&&ev.sessionId!==sessionId){sessionId=ev.sessionId;localStorage.setItem('chat_sessionId',sessionId);} break;
+            case 'done': hideStatus(); if(ev.sessionId&&ev.sessionId!==sessionId){sessionId=ev.sessionId;try{localStorage.setItem('chat_sessionId',sessionId);}catch(e){};} break;
             case 'error': showStatus(ev.message,true); fullContent+=`\n\n> 错误：${ev.message}`; if(bubble)bubble.innerHTML=renderMarkdown(fullContent); break;
           }
-        } catch(e){}
+        } catch(e){ console.warn('[SSE] event parse error:', e); }
       }
     }
   } catch(err) {
@@ -219,8 +385,8 @@ function saveSettings() {
 document.getElementById('btn-settings').addEventListener('click', openSettings);
 
 function clearHistory() {
-  messages=[]; sessionId=null;
-  localStorage.removeItem('chat_messages'); localStorage.removeItem('chat_sessionId');
+  messages=[]; sessionId=null; ragResultsCache = {};
+  localStorage.removeItem('chat_messages'); localStorage.removeItem('chat_sessionId'); localStorage.removeItem('chat_ragResults');
   // 重置 chat-content 内容
   document.getElementById('chat-content').innerHTML = `
     <div class="welcome" id="welcome">
@@ -239,4 +405,3 @@ function clearHistory() {
 }
 document.getElementById('btn-clear').addEventListener('click', ()=>{ if(confirm('清空当前对话？')) clearHistory(); });
 
-function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }

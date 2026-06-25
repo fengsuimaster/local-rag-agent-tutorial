@@ -15,7 +15,7 @@ COLLECTION_NAME = "smps_knowledge"
 EMBED_MODEL = "qwen3-embedding:8b"
 
 # ======================== 检索默认参数 ========================
-SIMILARITY_TOP_K = 3
+SIMILARITY_TOP_K = 5
 
 # ======================== 文档切分配置 ========================
 MAX_NODE_LENGTH = 1200
