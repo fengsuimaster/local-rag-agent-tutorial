@@ -8,6 +8,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* 让头部大标题、副标题和脚注应用 sec4 的颜色 */
+        .header h1,
+        .header .subtitle,
+        .footer {
+            color: #709b12;      /* sec4 主文字色，深黄绿 */
+        }
+        
+        /* 脚注中的小圆点也换成同色系 */
+        .footer .dot {
+            background-color: #a5d6a7;  /* 已有的绿色，可保留；若想更贴近 sec4 可换为 #558B2F */
+        }
+        
+        .sub-heading {
+            color: #26330a;
+            border-bottom-color: #f1f4d2;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -16,8 +34,7 @@
             <p class="subtitle">Large Language Model &amp; Ecosystem Concepts</p>
         </header>
 
-        <!-- 1. 大模型 · 绿色调 -->
-        <section class="section sec7">
+        <section class="section sec4">
             <div class="section-header">
                 <span class="section-number">1</span>
                 <div class="section-title-group">
@@ -33,7 +50,6 @@
             </div>
         </section>
 
-        <!-- 2. 智能体 · 橙色调 -->
         <section class="section sec4">
             <div class="section-header">
                 <span class="section-number">2</span>
@@ -53,8 +69,7 @@
             </div>
         </section>
 
-        <!-- 3. 如何使用大模型 · 紫色调 -->
-        <section class="section sec2">
+        <section class="section sec4">
             <div class="section-header">
                 <span class="section-number">3</span>
                 <div class="section-title-group">
@@ -98,8 +113,7 @@
             </div>
         </section>
 
-        <!-- 4. 什么是 RAG · 黄绿色调 -->
-        <section class="section sec5">
+        <section class="section sec4">
             <div class="section-header">
                 <span class="section-number">4</span>
                 <div class="section-title-group">
@@ -138,8 +152,7 @@
             </div>
         </section>
 
-        <!-- 5. 两种提示词 · 青色调 -->
-        <section class="section sec6">
+        <section class="section sec4">
             <div class="section-header">
                 <span class="section-number">5</span>
                 <div class="section-title-group">
@@ -165,8 +178,7 @@
             </div>
         </section>
 
-        <!-- 6. Skill · 粉色调 -->
-        <section class="section sec7">
+        <section class="section sec4">
             <div class="section-header">
                 <span class="section-number">6</span>
                 <div class="section-title-group">
@@ -194,6 +206,8 @@
             <span>大模型及相关概念梳理</span>
             <span class="dot"></span>
             <span>风水master</span>
+            <span class="dot"></span>
+            <span>fengsuimaster.xyz</span>
             <span class="dot"></span>
             <span>2026</span>
         </footer>

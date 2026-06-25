@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地 RAG 核心搭建 · 风水master</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        pre {
+            background: #f5f7f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-family: var(--font-mono);
+            font-size: 0.92em;
+            line-height: 1.65;
+            overflow-x: auto;
+            margin: 14px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #1e293b;
+        }
+        .simple-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.95rem;
+        }
+        .simple-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 2px solid #e2e8f0;
+            color: #0f172a;
+        }
+        .simple-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+        .section-body ul,
+        .section-body ol {
+            padding-left: 24px;
+            margin-bottom: 13px;
+        }
+        .section-body li {
+            font-size: 1.15rem;
+            line-height: 1.72;
+            margin-bottom: 4px;
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>本地 RAG 核心搭建</h1>
+            <p class="subtitle">Local RAG Core — Ingestion to Retrieval</p>
+        </header>
+
+        <!-- 环境与依赖 -->
+        <section class="section sec7">
+            <div class="section-header">
+                <span class="section-number">1</span>
+                <div class="section-title-group">
+                    <h2>环境与依赖</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <p>在开始之前，需要准备好 Python 运行环境和必要的依赖包。</p>
+                <p><strong>Python 虚拟环境</strong>用于隔离项目依赖，避免与系统 Python 或其他项目的包版本冲突。推荐使用 <code>venv</code> 模块创建：</p>
+                <pre>python -m venv openai_env
+source openai_env/Scripts/activate   # Windows（Git Bash）</pre>
+                <p>进入虚拟环境后安装依赖：</p>
+                <pre>pip install llama-index-core llama-index-readers-file \
+            llama-index-embeddings-ollama llama-index-vector-stores-chroma \
+            chromadb Flask</pre>
+                <p>各依赖在 RAG 系统中的角色如下：</p>
+                <table class="simple-table">
+                    <thead>
+                        <tr>
+                            <th>包名</th>
+                            <th>角色</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>llama-index-core</code></td>
+                            <td>文档加载、节点切分、索引管理——整个 RAG 流程的编排框架</td>
+                        </tr>
+                        <tr>
+                            <td><code>llama-index-readers-file</code></td>
+                            <td>文件目录读取器，递归扫描 <code>input/</code> 下的所有 <code>.md</code> 文件</td>
+                        </tr>
+                        <tr>
+                            <td><code>llama-index-embeddings-ollama</code></td>
+                            <td>Ollama 嵌入模型的适配器，将文本请求转发给 Ollama 服务</td>
+                        </tr>
+                        <tr>
+                            <td><code>llama-index-vector-stores-chroma</code></td>
+                            <td>Chroma 向量数据库的适配器，负责向量的存取</td>
+                        </tr>
+                        <tr>
+                            <td><code>chromadb</code></td>
+                            <td>轻量级向量数据库，本地持久化存储，无需独立服务端</td>
+                        </tr>
+                        <tr>
+                            <td><code>Flask</code></td>
+                            <td>检索服务的 HTTP 框架，对外提供 REST API 端点</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 文档数据：Markdown 知识源 -->
+        <section class="section sec7">
+            <div class="section-header">
+                <span class="section-number">2</span>
+                <div class="section-title-group">
+                    <h2>文档数据：Markdown 知识源</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <p><strong>RAG 的质量天花板取决于知识库的质量。</strong>无论检索算法多精妙、嵌入模型多先进，如果知识库本身内容稀疏、格式混乱或与问题领域不匹配，检索结果必然差强人意。因此，文档准备是 RAG 搭建中投入产出比最高的一步。</p>
+                <h3 class="sub-heading">为什么用 Markdown</h3>
+                <p>原始教学课件通常为 PDF 格式。PDF 适合阅读和打印，但作为 RAG 知识库的数据源存在两个痛点：一是文本提取可能丢失层级结构和格式信息，二是公式、表格在提取时容易变形。</p>
+                <p><strong>Markdown（<code>.md</code>）</strong> 是更适合 RAG 的文档格式，原因有三：</p>
+                <ul>
+                    <li><strong>层级清晰</strong>：<code>#</code> <code>##</code> <code>###</code> 等标题标记天然携带文档的逻辑结构，切分工具可以直接按标题层级做语义切分，而非按固定长度暴力截断</li>
+                    <li><strong>纯文本友好</strong>：无二进制编码，无需 OCR，嵌入模型能直接处理</li>
+                    <li><strong>可版本控制</strong>：纯文本便于 Git 追踪变更、团队协作编辑</li>
+                </ul>
+                <h3 class="sub-heading">PDF 转 Markdown</h3>
+                <p>将 PDF 课件转为 Markdown 是数据准备的必要步骤。现代多模态大模型已经具备直接从 PDF 文件中读取文字、识别标题层级、转换公式的能力，可以胜任这项任务。实际操作中有两种方式：</p>
+                <table class="simple-table">
+                    <thead>
+                        <tr>
+                            <th>方式</th>
+                            <th>适用场景</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>网页端对话</strong></td>
+                            <td>少量文件、免费</td>
+                            <td>将 PDF 上传至对话界面，提示模型"将此 PDF 转换为 Markdown 格式，保留原标题层级，公式用 LaTeX 书写"。大模型逐页读取并输出转换后的 Markdown，人工复核后保存。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API 批量处理</strong></td>
+                            <td>文件较多、自动化</td>
+                            <td>编写脚本调用大模型 API，传入 PDF 文件，指定输出格式为 Markdown。</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3 class="sub-heading">文档内容与组织</h3>
+                <p>本案的知识库覆盖电力电子技术课程的 <strong>6 个核心模块</strong>，每个模块为一个独立的 Markdown 文件：</p>
+                <table class="simple-table">
+                    <thead>
+                        <tr>
+                            <th>文件</th>
+                            <th>对应模块</th>
+                            <th>大小</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>power-device.md</code></td>
+                            <td>电力电子器件</td>
+                            <td>41 KB</td>
+                        </tr>
+                        <tr>
+                            <td><code>ac-dc-rectifier.md</code></td>
+                            <td>AC-DC 变换电路</td>
+                            <td>45 KB</td>
+                        </tr>
+                        <tr>
+                            <td><code>dc-dc-converter.md</code></td>
+                            <td>DC-DC 变换电路</td>
+                            <td>30 KB</td>
+                        </tr>
+                        <tr>
+                            <td><code>dc-ac-inverter.md</code></td>
+                            <td>DC-AC 变换电路</td>
+                            <td>26 KB</td>
+                        </tr>
+                        <tr>
+                            <td><code>ac-ac-converter.md</code></td>
+                            <td>AC-AC 变换电路</td>
+                            <td>22 KB</td>
+                        </tr>
+                        <tr>
+                            <td><code>soft-switching.md</code></td>
+                            <td>软开关技术</td>
+                            <td>18 KB</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>全部 6 份文档放入 <code>raw-docs/input/</code> 目录，构建脚本会递归读取该目录下的所有 <code>.md</code> 文件</p>
+            </div>
+        </section>
+
+        <!-- Ollama：本地嵌入模型运行环境 -->
+        <section class="section sec7">
+            <div class="section-header">
+                <span class="section-number">3</span>
+                <div class="section-title-group">
+                    <h2>Ollama：本地嵌入模型运行环境</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <p><strong>Ollama</strong> 是一个开源的大模型本地运行工具，它将模型的下载、量化、推理和 API 服务封装为一条命令，无需手动配置 GPU 驱动或深度学习框架。在 RAG 系统中，Ollama 充当嵌入模型的运行载体。</p>
+                <h3 class="sub-heading">安装与启动</h3>
+                <p>从 <a href="https://ollama.com" target="_blank">ollama.com</a> 下载对应操作系统的安装包（支持 Windows / macOS / Linux）。安装完成后，Ollama 在后台启动服务，默认监听 <code>http://127.0.0.1:11434</code>。</p>
+                <p>使用以下命令验证安装：</p>
+                <pre>ollama --version</pre>
+                <h3 class="sub-heading">拉取嵌入模型</h3>
+                <p>嵌入模型的选择需要权衡<strong>语义理解质量</strong>和<strong>推理速度</strong>。参数规模大的模型精度更高，但在 CPU 上推理速度可能无法接受；参数过小的模型则可能无法准确捕捉中文专业术语的语义。</p>
+                <p>本案选用 <strong><code>qwen3-embedding:8b</code></strong>——阿里通义千问系列的嵌入模型，8B 参数规模，支持中英双语。在中文技术文档的语义检索任务上表现优秀，且能在主流消费级硬件上流畅运行。使用以下指令下载模型。</p>
+                <pre>ollama pull qwen3-embedding:8b</pre>
+                <p>拉取完成后，模型由 Ollama 自动管理存储、加载和推理。<code>qwen3-embedding:8b</code> 的输出为 4096 维向量——这个维度越高，向量能表达的语义细节越丰富，但存储和检索的开销也越大。4096 维是当前嵌入模型的主流水平，在精度和效率之间取得了较好的平衡。</p>
+                <p>使用以下命令查看当前已有模型：</p>
+                <pre>ollama list</pre>
+            </div>
+        </section>
+
+        <!-- 索引构建：切分 → 嵌入 → 入库 -->
+        <section class="section sec7">
+            <div class="section-header">
+                <span class="section-number">4</span>
+                <div class="section-title-group">
+                    <h2>索引构建：切分 → 嵌入 → 入库</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <p>文档和嵌入模型都准备就绪后，下一步是将文档向量化并存入向量数据库——这个过程称为<strong>构建索引</strong>。本案的构建脚本 <code>src/build_index.py</code> 封装了完整流程，一次运行即可完成全部工作。</p>
+                <h3 class="sub-heading">统一配置</h3>
+                <p>所有可调参数集中在 <code>src/config.py</code> 中管理，构建脚本和检索服务共享同一份配置，避免参数不一致导致的问题：</p>
+                <pre># 路径配置
+DOC_DIR = "raw-docs/input"          # 文档源目录
+PERSIST_DIR = "database/vector"     # 向量库持久化目录
+
+# 向量库配置
+COLLECTION_NAME = "smps_knowledge"  # 集合名称
+
+# 嵌入模型
+EMBED_MODEL = "qwen3-embedding:8b" # Ollama 模型名
+
+# 检索默认参数
+SIMILARITY_TOP_K = 5               # 默认返回 top-5
+
+# 切分配置
+MAX_NODE_LENGTH = 1200             # 超长节点二次切分阈值（字符）
+CHUNK_SIZE = 800                   # 二次切分的片段大小
+CHUNK_OVERLAP = 100                # 相邻片段的重叠长度
+
+# 嵌入写入
+BATCH_SIZE = 10                    # 每批嵌入条数</pre>
+                <h3 class="sub-heading">构建流程</h3>
+                <p>执行构建命令：</p>
+                <pre>python src/build_index.py</pre>
+                <p>脚本按 5 个阶段依次执行，每个阶段都在终端输出进度和统计信息。</p>
+                <h4 class="sub-heading">阶段一：加载文档</h4>
+                <p>使用 LlamaIndex 的 <code>SimpleDirectoryReader</code> 递归读取 <code>raw-docs/input/</code> 目录下的全部 Markdown 文件。每个文件被加载为一个 <code>Document</code> 对象，同时携带文件名等元数据。此阶段同时清理文档中残留的 <code>&amp;emsp;</code> 全角空格缩进。</p>
+                <h4 class="sub-heading">阶段二上部：Markdown 层级切分 + 噪声过滤 + 路径注入</h4>
+                <p>切分环节是整个流水线最关键的一步，它决定了后续检索的质量上限。本案采用<strong>两级切分策略</strong>，第一级为 Markdown 标题层级切分。</p>
+                <p><strong>切分：</strong>使用 <code>MarkdownNodeParser</code> 按标题层级（<code>#</code> → <code>##</code> → <code>###</code> → <code>####</code>）将文档拆解为独立的文本节点。每个节点对应 Markdown 的一个逻辑段落——可能是一个章节的概述，也可能是某个子主题的详细展开。</p>
+                <div class="highlight-box">
+                    <strong>举个例子：</strong> <code>power-device.md</code> 中的 <code>## 全控型器件</code> 标题下有 <code>#### GTR 功率三极管</code> 和 <code>#### 功率 MOSFET</code> 两个子节点。<code>MarkdownNodeParser</code> 会将它们分别切分为独立的节点，而不是把"GTR"和"MOSFET"的内容混在一个大块里。这样，当用户问"GTR 的工作原理"时，检索能精准命中对应的节点，而不会被 MOSFET 的内容稀释。
+                </div>
+                <p><strong>噪声过滤：</strong>切分后的节点中会混入三类无意义内容——仅有标题无正文的空节点、正文为 <code>[TOC]</code> 的占位节点、YAML front matter 元数据节点。这些节点不含实质信息，须过滤移除，避免在检索时占据有效位置。</p>
+                <p><strong>路径注入：</strong>在每个节点的正文前添加其在整个文档中的层级路径（如 <code>[定义 &gt; 功率器件概述 &gt; 功率器件的分类]</code>）。这一步骤让嵌入模型在向量化时感知到节点在文档结构中的位置——当用户问"功率器件有哪些类型"时，"定义/功率器件概述/功率器件的分类"这个路径信息帮助模型确认这段内容确实在回答分类问题。</p>
+                <h4 class="sub-heading">阶段二下部：超长节点二次切分</h4>
+                <p>Markdown 标题切分可能产生过长的节点（例如包含大段介绍和公式的章节）。超过 <code>MAX_NODE_LENGTH</code> 的节点会触发<strong>二次切分</strong>：使用 <code>SentenceSplitter</code> 按句子边界进一步拆分，每段 800 字符，相邻段保留 100 字符的交叠区域。</p>
+                <div class="highlight-box">
+                    <strong>为什么保留交叠区域？</strong>如果严格按照 800 字符一刀切，可能会把一个完整的定义切成两半——上半段在片段 A 的末尾，下半段在片段 B 的开头。检索时只召回了片段 A，大模型看到的定义就不完整。100 字符的交叠相当于给每个片段两边各留一点"安全带"，保证不会有信息在切分边界处断裂丢失。
+                </div>
+                <h4 class="sub-heading">阶段三：连接嵌入模型</h4>
+                <p>初始化 <code>OllamaEmbedding</code>，发送一条测试文本验证连通性。若 Ollama 未启动或模型未拉取，构建在此处终止并给出明确错误提示。终端输出嵌入向量维度（4096），确认模型正常。</p>
+                <h4 class="sub-heading">阶段四：准备向量数据库</h4>
+                <p>清理旧的同名集合（如存在），创建新的 Chroma 集合。相似度度量设置为<strong>余弦相似度（Cosine Similarity）</strong>——这是语义检索最常用的度量方式，它关注向量在空间中的"方向"而非"长度"：语义相近的文本其向量指向相近的方向，而与文本长度无关。</p>
+                <p>Chroma 内部使用 <strong>HNSW（Hierarchical Navigable Small World）</strong> 索引结构加速搜索。HNSW 是一种基于图的近似最近邻算法，在百万级向量规模下仍能保持毫秒级的检索速度。</p>
+                <h4 class="sub-heading">阶段五：逐批嵌入与写入</h4>
+                <p>这是最耗时的阶段。将全部文本节点按每批 10 条送入 Ollama 嵌入模型，获取 4096 维向量后，连同原始文本和元数据（文件名、章节路径）一起写入 Chroma 向量库。终端实时显示进度和预估剩余时间：</p>
+                <pre>进度: 230/437 (52%) | 耗时: 45s | 剩余: 40s</pre>
+                <p>写入完成后，终端输出总耗时和向量库实际条目数，确认写入完整、数量一致。最终全部向量数据持久化在 <code>database/vector/</code> 目录中。</p>
+            </div>
+        </section>
+
+        <!-- 测试验证 -->
+        <section class="section sec7">
+            <div class="section-header">
+                <span class="section-number">5</span>
+                <div class="section-title-group">
+                    <h2>测试验证</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <p>索引构建完成后，使用 <code>query_test.py</code> 进行交互式检索验证。该脚本直接加载本地向量库，<strong>无需启动 Flask 服务</strong>，通过命令行交互的方式逐条测试检索效果：</p>
+                <pre>python src/query_test.py</pre>
+                <p>脚本启动后加载向量库索引，进入交互循环。输入问题即可查看详细检索结果，输入 <code>exit</code> 退出。</p>
+                <pre>正在加载向量库...
+向量库加载成功（共 437 条）。输入 'exit' 退出。
+
+请输入问题：什么是功率器件
+检索中...
+
+最相关的 5 个片段：
+
+──────────────────────────────────────────────────
+[1] 文件: power-device.md
+    章节: /定义/功率器件概述/功率器件的分类/
+    相关度: 0.7162
+    内容:
+[定义 > 功率器件概述 > 功率器件的分类]
+### 功率器件的分类
+功率器件通常工作于高电压、大电流条件下，按导通与关断的可控性可分为三类...
+
+──────────────────────────────────────────────────
+[2] 文件: power-device.md
+    章节: /定义/功率器件概述/功率器件的分类/
+    相关度: 0.6738
+    内容:
+    ...</pre>
+                <p>每条结果包含<strong>文件来源、章节路径、相关度分数和完整节点文本</strong>。验证时重点关注：</p>
+                <ul>
+                    <li><strong>相关性</strong>：用已知存在于文档中的术语提问，top-1 结果应与问题直接相关，分数通常在 0.6 以上为合格</li>
+                    <li><strong>噪声</strong>：正文中不应残留 <code>&amp;emsp;</code>、<code>[TOC]</code> 等预处理应已清除的噪声字符</li>
+                    <li><strong>延迟</strong>：单次检索应在 1~3 秒完成，远超此范围说明 Ollama 服务或向量库加载异常</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 检索服务：Flask API -->
+        <section class="section sec7">
+            <div class="section-header">
+                <span class="section-number">6</span>
+                <div class="section-title-group">
+                    <h2>检索服务：Flask API</h2>
+                    <span class="section-eng">Retrieval Service: Flask API</span>
+                </div>
+            </div>
+            <div class="section-body">
+                <p>为了让其他应用（如聊天前端、自动化脚本）可以调用向量库的检索能力，我们通过 Flask 封装此服务为 HTTP API。服务启动后常驻内存，接收查询请求并返回检索结果。</p>
+                <h3 class="sub-heading">API 端点</h3>
+                <p>服务默认监听 <code>http://127.0.0.1:5050</code>，可通过环境变量 <code>RAG_PORT</code> 指定端口：</p>
+                <pre>python src/query_api.py              # 默认 5050
+RAG_PORT=5055 python src/query_api.py  # 自定义 5055</pre>
+                <table class="simple-table">
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>路径</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/</code></td>
+                            <td>服务说明页，显示向量库名称和条目数</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/health</code></td>
+                            <td>健康检查，返回 <code>{"status":"ok"}</code> 及集合信息</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td><code>/retrieve</code></td>
+                            <td>检索入口，请求体：<code>{"question":"...","top_k":5}</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3 class="sub-heading">请求与响应</h3>
+                <p><strong>请求示例</strong>（<code>POST /retrieve</code>）：</p>
+                <pre>{
+  "question": "什么是功率器件",
+  "top_k": 3
+}</pre>
+                <p><strong>响应示例</strong>：</p>
+                <pre>{
+  "results": [
+    {
+      "file_name": "power-device.md",
+      "section": "/功率器件概述/功率器件的分类",
+      "score": 0.8765,
+      "text": "..."
+    }
+  ],
+  "context": "[参考资料 1] 文件: power-device.md  |  章节: /功率器件概述/功率器件的分类/\n[定义 > 功率器件概述 > 功率器件的分类]\n### 功率器件的分类\n功率器件通常工作于高电压、大电流条件下...\n\n[参考资料 2] ..."
+}</pre>
+                <p><strong><code>results</code></strong>：结构化检索结果数组，每项含 <code>file_name</code>（来源文件）、<code>section</code>（章节路径）、<code>score</code>（相似度，0~1）、<code>text</code>（完整节点文本），适合需要元数据的场景。</p>
+                <p><strong><code>context</code></strong>：按 <code>[参考资料 N] 文件: xxx | 章节: xxx</code> 格式拼接好的纯文本上下文，后跟完整节点正文，可直接注入大模型的系统提示词，作为回答的依据。</p>
+                <h3 class="sub-heading">启动时的检查</h3>
+                <p>服务启动时会依次执行两项检查：</p>
+                <ul>
+                    <li><strong>Ollama 连通性检查</strong>：向 <code>http://127.0.0.1:11434/api/tags</code> 发送请求，确认 Ollama 服务在线。若超时或拒绝连接，终止启动并提示用户先启动 Ollama。</li>
+                    <li><strong>向量库加载</strong>：读取 <code>database/vector/</code> 目录下的 Chroma 持久化数据，建立索引对象。若目录不存在或数据损坏，同样终止启动并给出明确错误。</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span>本地 RAG 核心搭建</span>
+            <span class="dot"></span>
+            <span>风水master</span>
+            <span class="dot"></span>
+            <span>fengsuimaster.xyz</span>
+            <span class="dot"></span>
+            <span>2026</span>
+        </footer>
+    </div>
+</body>
+</html>

@@ -346,6 +346,17 @@ strong {
     display: inline-block;
 }
 
+
+.mermaid {
+    background: #ffffff;
+    border: 1px solid #d0e2fa;
+    border-radius: 10px;
+    padding: 24px 20px;
+    margin: 20px 0;
+    overflow-x: auto;
+    font-family: 'MyCustomFont', 'Inter', sans-serif;
+}
+
 /* ========== 章节个性化覆盖 ========== */
 /* 以下所有 .section-number 均添加了打印色彩保留属性 */
 
@@ -408,17 +419,17 @@ strong {
 
 /* ---- 章节4 · 黄绿色调 ---- */
 .sec4 .section-number { background: #558B2F; }
-.sec4 { background: #ffffff; border-color: #f1f4d2; }
+.sec4 { background: #ffffff; border-color: #e3e6c4; }
 .sec4:hover { border-color: #e0e5a0; }
-.sec4 .section-title-group h2 { color: #26330a; }
+.sec4 .section-title-group h2 { color: #33440d; }
 .sec4 .section-eng { color: #5a6e20; }
 .sec4 .section-body p { color: #3d5010; }
 .sec4 .highlight-box { border-left-color: #dce775; color: #26330a; }
-.sec4 .sub-heading { border-bottom-color: #f1f4d2; color: #26330a; }
-.sec4 .styled-list li { border-left-color: #f1f4d2; color: #3d5010; }
+.sec4 .sub-heading { border-bottom-color: #e3e6c4; color: #26330a; }
+.sec4 .styled-list li { border-left-color: #e3e6c4; color: #3d5010; }
 .sec4 .styled-list li:hover { border-left-color: #dce775; }
 .sec4 .list-marker { color: #558B2F; }
-.sec4 .mini-card { border-color: #f1f4d2; }
+.sec4 .mini-card { border-color: #e3e6c4; }
 .sec4 .mini-card:hover { border-color: #e0e5a0; background: #fdfdf5; }
 .sec4 .mini-card .card-label { color: #558B2F; }
 .sec4 .mini-card .card-text { color: #3d5010; }
@@ -467,11 +478,11 @@ strong {
 .sec7 .section-number { background: #1273eb; color: #ffffff; }
 .sec7 { background: #ffffff; border-color: #d0e2fa; }
 .sec7:hover { border-color: #a3c8f5; }
-.sec7 .section-title-group h2 { color: #0a2252; }
+.sec7 .section-title-group h2 { color: #0f3174; }
 .sec7 .section-eng { color: #2b5599; }
 .sec7 .section-body p { color: #14366b; }
-.sec7 .highlight-box { border-left-color: #7eb3f7; color: #0a2252; }
-.sec7 .sub-heading { border-bottom-color: #d0e2fa; color: #0a2252; }
+.sec7 .highlight-box { border-left-color: #7eb3f7; color: #0f3174; }
+.sec7 .sub-heading { border-bottom-color: #d0e2fa; color: #0f3174; }
 .sec7 .styled-list li { border-left-color: #d0e2fa; color: #14366b; }
 .sec7 .styled-list li:hover { border-left-color: #7eb3f7; }
 .sec7 .list-marker { color: #1273eb; }
@@ -480,7 +491,7 @@ strong {
 .sec7 .mini-card .card-label { color: #1273eb; }
 .sec7 .mini-card .card-text { color: #14366b; }
 .sec7 code { color: #0f4da0; background: #e8f1fd; }
-.sec7 strong { color: #0a2252; }
+.sec7 strong { color: #0f3174; }
 
 /* ---- 章节8 · 暖杏色调（强调 #FFD3A5） ---- */
 .sec8 .section-number { background: #FFD3A5; color: #ffffff; }
@@ -647,3 +658,4 @@ strong {
         color: #ffffff !important;
     }
 }
+
