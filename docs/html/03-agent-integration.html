@@ -9,66 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <style>
-        pre {
-            background: #f5f7f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px 20px;
-            font-family: var(--font-mono);
-            font-size: 0.92em;
-            line-height: 1.65;
-            overflow-x: auto;
-            margin: 14px 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            color: #1e293b;
-        }
-        .simple-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-            font-size: 0.95rem;
-        }
-        .simple-table th {
-            background: #f1f5f9;
-            font-weight: 600;
-            text-align: left;
-            padding: 10px 14px;
-            border-bottom: 2px solid #e2e8f0;
-            color: #0f172a;
-        }
-        .simple-table td {
-            padding: 10px 14px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #334155;
-        }
-        .section-body ul,
-        .section-body ol {
-            padding-left: 24px;
-            margin-bottom: 13px;
-        }
-        .section-body li {
-            font-size: 1.15rem;
-            line-height: 1.72;
-            margin-bottom: 4px;
-            color: inherit;
-        }
-        .mermaid {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 16px 0;
-            overflow-x: auto;
-            font-family: var(--font-mono);
-            font-size: 0.9em;
-            line-height: 1.6;
-            white-space: pre;
-        }
-    </style>
 </head>
-<body>
+<body class="t-agent">
     <div class="container">
         <header class="header">
             <h1>工作流集成与 Agent 界面</h1>
@@ -76,7 +18,7 @@
         </header>
 
         <!-- 概述 -->
-        <section class="section sec7">
+        <section class="section">
             <div class="section-header">
                 <span class="section-number">1</span>
                 <div class="section-title-group">
@@ -85,12 +27,15 @@
                 </div>
             </div>
             <div class="section-body">
-                <p>整个系统由三个独立的服务进程组成，各司其职：</p>
+                <p>整个系统由四个节点组成，各司其职：</p>
                 <div class="mermaid">
                     graph LR
-                    A[前端聊天界面<br/>浏览器<br/>localhost:3001] -->|"POST /api/chat<br/>(SSE 流式)"| B[Node.js 中间层<br/>Express + SDK<br/>localhost:3001]
-                    B -->|"POST /retrieve<br/>(HTTP)"| C[RAG 检索服务<br/>Flask<br/>127.0.0.1:5050]
-                    B -.->|"SDK（内部）"| D[Claude API<br/>云端]
+                    A[前端聊天界面<br/>浏览器] -->|"POST /api/chat"| B[Node.js 中间层<br/>Express + SDK]
+                    B -->|"POST /retrieve"| C[RAG 检索服务<br/>Flask + ChromaDB]
+                    C -->|"返回 context + results"| B
+                    B -->|"注入 system prompt"| D[Claude API<br/>云端]
+                    D -.->|"流式响应"| B
+                    B -.->|"SSE 推送"| A
                 </div>
                 <table class="simple-table">
                     <thead>
@@ -120,14 +65,20 @@
                             <td>5050</td>
                             <td>文档检索、上下文拼接</td>
                         </tr>
+                        <tr>
+                            <td>Claude API</td>
+                            <td>Anthropic Claude（云端）</td>
+                            <td>—</td>
+                            <td>接收 system prompt（含 RAG 上下文）和用户消息，生成回答</td>
+                        </tr>
                     </tbody>
                 </table>
-                <p>三层解耦的设计意味着每个服务可以独立重启、调试和替换。RAG 检索服务不感知前端，Node.js 中间层不感知向量库的具体实现，前端不感知模型调用细节。</p>
+                <p>每层各司其职、独立可替换。RAG 检索服务不感知前端，Node.js 中间层不感知向量库的具体实现，前端不感知模型调用细节，Claude API 可替换为其他模型而不影响其他层。</p>
             </div>
         </section>
 
         <!-- 配置与环境 -->
-        <section class="section sec7">
+        <section class="section">
             <div class="section-header">
                 <span class="section-number">2</span>
                 <div class="section-title-group">
@@ -162,7 +113,7 @@ export const MAX_TOKENS = 8192;          // Agent 单次回复最大 token</pre>
         </section>
 
         <!-- 系统提示词 -->
-        <section class="section sec7">
+        <section class="section">
             <div class="section-header">
                 <span class="section-number">3</span>
                 <div class="section-title-group">
@@ -237,7 +188,7 @@ export const MAX_TOKENS = 8192;          // Agent 单次回复最大 token</pre>
         </section>
 
         <!-- Claude Agent SDK 集成 -->
-        <section class="section sec7">
+        <section class="section">
             <div class="section-header">
                 <span class="section-number">4</span>
                 <div class="section-title-group">
@@ -278,7 +229,7 @@ async function getAgentSdk() {
         </section>
 
         <!-- 前端聊天界面 -->
-        <section class="section sec7">
+        <section class="section">
             <div class="section-header">
                 <span class="section-number">5</span>
                 <div class="section-title-group">
@@ -303,7 +254,7 @@ async function getAgentSdk() {
         </section>
 
         <!-- 消息数据持久化 -->
-        <section class="section sec7">
+        <section class="section">
             <div class="section-header">
                 <span class="section-number">6</span>
                 <div class="section-title-group">
@@ -345,7 +296,7 @@ async function getAgentSdk() {
         </section>
 
         <!-- 完整请求生命周期 -->
-        <section class="section sec7">
+        <section class="section">
             <div class="section-header">
                 <span class="section-number">7</span>
                 <div class="section-title-group">

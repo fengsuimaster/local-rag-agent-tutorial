@@ -1,83 +1,156 @@
+/* ==========================================================================
+   docs CSS — 主题驱动样式表
+   在 <body> 上加 class="t-xxx" 即可整体换色
+   ========================================================================== */
+
+/* =========================== 字体 =========================== */
 @font-face {
-    font-family: 'MyCustomFont'; 
+    font-family: 'MyCustomFont';
     src: url('../ttf/SanJiLuRongTi-2.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    unicode-range: U+4E00-9FFF, U+3400-4DBF, U+20000-2A6DF, U+2A700-2B73F, 
+    unicode-range: U+4E00-9FFF, U+3400-4DBF, U+20000-2A6DF, U+2A700-2B73F,
                    U+2B740-2B81F, U+2B820-2CEAF, U+F900-FAFF, U+2F800-2FA1F;
 }
+
+/* =========================== 主题变量 =========================== */
+/* 默认值 = 蓝色系（对应 t-core，02 文件无需额外 class 也能渲染） */
+:root {
+    --t-accent:            #1273eb;
+    --t-accent-strong:     #0f4da0;
+    --t-text-strong:       #0f3174;
+    --t-text-base:         #14366b;
+    --t-text-soft:         #2b5599;
+    --t-header:            #2876ddde;
+    --t-section-border:    #d0e2fa;
+    --t-section-border-hover: #a3c8f5;
+    --t-highlight-border:  #7eb3f7;
+    --t-highlight-bg:      #f8fbff;
+    --t-subheading-border: #d0e2fa;
+    --t-subheading-color:  #0f3174;
+    --t-code-bg:           #e8f1fd;
+    --t-code-color:        #0f4da0;
+    --t-dot:               #7eb3f7;
+    --t-list-border:       #d0e2fa;
+    --t-list-hover:        #7eb3f7;
+    --t-list-marker:       #1273eb;
+    --t-list-item-color:   #14366b;
+    --t-card-border:       #d0e2fa;
+    --t-card-hover-border: #a3c8f5;
+    --t-card-hover-bg:     #f8fbff;
+    --t-card-label:        #1273eb;
+    --t-card-text:         #14366b;
+    --t-strong-color:      #0f3174;
+    --t-section-bg:        #ffffff;
+    --t-table-th-bg:       #e8f1fd;
+    --t-table-border:      #d0e2fa;
+    --t-mermaid-bg:        #f8fbff;
+    --t-mermaid-border:    #d0e2fa;
+    --t-node-fill:         #edf3fc;
+    --t-pre-bg:            #f5f7f9;
+    --t-pre-border:        #e2e8f0;
+    --t-pre-color:         #1e293b;
+}
+
+/* ---- 主题 ①：黄绿色（01-concepts） ---- */
+.t-concepts {
+    --t-accent:            #558B2F;
+    --t-accent-strong:     #2E7D32;
+    --t-text-strong:       #26330a;
+    --t-text-base:         #3d5010;
+    --t-text-soft:         #5a6e20;
+    --t-header:            #709b12;
+    --t-section-border:    #e3e6c4;
+    --t-section-border-hover: #e0e5a0;
+    --t-highlight-border:  #dce775;
+    --t-highlight-bg:      #fefef9;
+    --t-subheading-border: #e3e6c4;
+    --t-subheading-color:  #26330a;
+    --t-code-bg:           #f2f5e0;
+    --t-code-color:        #3d5010;
+    --t-dot:               #a5d6a7;
+    --t-list-border:       #e3e6c4;
+    --t-list-hover:        #dce775;
+    --t-list-marker:       #558B2F;
+    --t-list-item-color:   #3d5010;
+    --t-card-border:       #e3e6c4;
+    --t-card-hover-border: #e0e5a0;
+    --t-card-hover-bg:     #fdfdf5;
+    --t-card-label:        #558B2F;
+    --t-card-text:         #3d5010;
+    --t-strong-color:      #26330a;
+    --t-section-bg:        #ffffff;
+    --t-table-th-bg:       #f2f5e0;
+    --t-table-border:      #e3e6c4;
+    --t-mermaid-bg:        #fcfdf5;
+    --t-mermaid-border:    #e3e6c4;
+    --t-node-fill:         #f2f4dd;
+    --t-pre-bg:            #fafbf5;
+    --t-pre-border:        #e3e6c4;
+    --t-pre-color:         #3d5010;
+}
+
+/* ---- 主题 ②：蓝色（02-local-rag-core）与默认值一致 ---- */
+.t-core {
+    /* 全部继承 :root，无需覆写 */
+}
+
+/* ---- 主题 ③：橙色（03-agent-integration） ---- */
+.t-agent {
+    --t-accent:            #E65100;
+    --t-accent-strong:     #c43c00;
+    --t-text-strong:       #5a2c00;
+    --t-text-base:         #7a3f00;
+    --t-text-soft:         #9e5800;
+    --t-header:            #9e5800;
+    --t-section-border:    #f5e2cc;
+    --t-section-border-hover: #f0c790;
+    --t-highlight-border:  #ffcc80;
+    --t-highlight-bg:      #fffcf7;
+    --t-subheading-border: #f5e2cc;
+    --t-subheading-color:  #5a2c00;
+    --t-code-bg:           #fcefe0;
+    --t-code-color:        #7a3f00;
+    --t-dot:               #ffcc80;
+    --t-list-border:       #f5e2cc;
+    --t-list-hover:        #ffcc80;
+    --t-list-marker:       #E65100;
+    --t-list-item-color:   #7a3f00;
+    --t-card-border:       #f5e2cc;
+    --t-card-hover-border: #f0c790;
+    --t-card-hover-bg:     #fffdf9;
+    --t-card-label:        #E65100;
+    --t-card-text:         #7a3f00;
+    --t-strong-color:      #5a2c00;
+    --t-section-bg:        #ffffff;
+    --t-table-th-bg:       #fcefe0;
+    --t-table-border:      #f5e2cc;
+    --t-mermaid-bg:        #fffcf7;
+    --t-mermaid-border:    #f5e2cc;
+    --t-node-fill:         #fdf3e5;
+    --t-pre-bg:            #fefaf6;
+    --t-pre-border:        #f5e2cc;
+    --t-pre-color:         #7a3f00;
+}
+
+/* =========================== 通用 =========================== */
 :root {
     --bg: #f9fbfd;
     --surface: #ffffff;
     --surface-alt: #fafcfd;
     --border: #e2e8f0;
     --border-light: #edf2f7;
-
-    /* 6个章节专属色调 (文字深色取自各自主色) */
-    --sec1-bg: #f4faf5;
-    --sec1-border: #d4e8d8;
-    --sec1-accent: #2E7D32;
-    --sec1-highlight-bg: #f8fdf9;
-    --sec1-highlight-border: #a5d6a7;
-    --sec1-text-strong: #1b3a1b;
-    --sec1-text-base: #2d4f2d;
-    --sec1-text-soft: #4a6b4a;
-
-    --sec2-bg: #fefaf5;
-    --sec2-border: #f5e2cc;
-    --sec2-accent: #E65100;
-    --sec2-highlight-bg: #fffcf7;
-    --sec2-highlight-border: #ffcc80;
-    --sec2-text-strong: #5a2c00;
-    --sec2-text-base: #7a3f00;
-    --sec2-text-soft: #9e5800;
-
-    --sec3-bg: #faf7fc;
-    --sec3-border: #e9d9f0;
-    --sec3-accent: #6A1B9A;
-    --sec3-highlight-bg: #fdf9fe;
-    --sec3-highlight-border: #ce93d8;
-    --sec3-text-strong: #2d0845;
-    --sec3-text-base: #4a1a6b;
-    --sec3-text-soft: #6e3a8c;
-
-    --sec4-bg: #fcfdf5;
-    --sec4-border: #f1f4d2;
-    --sec4-accent: #558B2F;
-    --sec4-highlight-bg: #fefef9;
-    --sec4-highlight-border: #dce775;
-    --sec4-text-strong: #26330a;
-    --sec4-text-base: #3d5010;
-    --sec4-text-soft: #5a6e20;
-
-    --sec5-bg: #f4fbfc;
-    --sec5-border: #d2eef3;
-    --sec5-accent: #006064;
-    --sec5-highlight-bg: #f9fefe;
-    --sec5-highlight-border: #80deea;
-    --sec5-text-strong: #002b2e;
-    --sec5-text-base: #00454a;
-    --sec5-text-soft: #1a6b70;
-
-    --sec6-bg: #fef7f9;
-    --sec6-border: #f8d8e1;
-    --sec6-accent: #880E4F;
-    --sec6-highlight-bg: #fff9fa;
-    --sec6-highlight-border: #f48fb1;
-    --sec6-text-strong: #3d001f;
-    --sec6-text-base: #5e1035;
-    --sec6-text-soft: #802d4d;
-
     --radius-sm: 6px;
     --radius: 10px;
     --radius-lg: 14px;
     --radius-xl: 18px;
-    --font-sans: 'MyCustomFont','Inter', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', -apple-system, sans-serif;
+    --font-sans: 'MyCustomFont', 'Inter', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', -apple-system, sans-serif;
     --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Menlo', monospace;
     --max-width: 1000px;
     --transition: 0.2s ease;
 }
 
+/* =========================== 重置 & 基础 =========================== */
 * {
     margin: 0;
     padding: 0;
@@ -96,6 +169,7 @@ body {
     font-size: 17px;
 }
 
+/* =========================== 布局 =========================== */
 .container {
     max-width: var(--max-width);
     margin: 0 auto;
@@ -106,32 +180,33 @@ body {
     box-shadow: 0 4px 20px rgba(0,0,0,0.02), 0 1px 3px rgba(0,0,0,0.03);
 }
 
+/* ---- Header ---- */
 .header {
     text-align: left;
     margin-bottom: 36px;
     padding-bottom: 22px;
-    border-bottom: 1px solid var(--border);
 }
 
 .header h1 {
     font-size: 2.8rem;
     font-weight: 700;
-    color: #2876ddde;
+    color: var(--t-header);
     letter-spacing: -0.02em;
     margin-bottom: 6px;
 }
 
 .header .subtitle {
     font-size: 1.4rem;
-    color: #2876ddde;
+    color: var(--t-header);
     font-weight: 400;
     letter-spacing: 0.03em;
 }
 
+/* ---- Section ---- */
 .section {
     margin-bottom: 28px;
-    background: var(--surface-alt);
-    border: 1px solid var(--border-light);
+    background: var(--t-section-bg);
+    border: 1px solid var(--t-section-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
     transition: border-color var(--transition), box-shadow var(--transition);
@@ -139,6 +214,7 @@ body {
 
 .section:hover {
     box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+    border-color: var(--t-section-border-hover);
 }
 
 .section:last-of-type {
@@ -162,9 +238,9 @@ body {
     font-weight: 700;
     font-size: 0.9rem;
     color: #ffffff;
+    background: var(--t-accent);
     flex-shrink: 0;
     letter-spacing: -0.01em;
-    /* 强制保留背景色与文字颜色（打印/PDF 用） */
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
@@ -177,6 +253,7 @@ body {
 .section-title-group h2 {
     font-size: 2.2rem;
     font-weight: 700;
+    color: var(--t-text-strong);
     letter-spacing: -0.01em;
     display: inline;
 }
@@ -184,6 +261,7 @@ body {
 .section-eng {
     font-size: 0.82rem;
     font-weight: 400;
+    color: var(--t-text-soft);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-left: 8px;
@@ -197,50 +275,78 @@ body {
     margin-bottom: 13px;
     font-size: 1.15rem;
     line-height: 1.72;
+    color: var(--t-text-base);
 }
 
 .section-body p:last-child {
     margin-bottom: 0;
 }
 
-/* 修复普通列表的缩进与样式 */
 .section-body ul,
 .section-body ol {
-    padding-left: 24px;      /* 恢复缩进，数值可调 */
-    margin-bottom: 13px;     /* 与段落间距一致 */
+    padding-left: 24px;
+    margin-bottom: 13px;
+    color: var(--t-text-base);
+}
+
+.section-body ul ::marker,
+.section-body ol ::marker {
+    color: var(--t-accent);
 }
 
 .section-body li {
-    font-size: 1.15rem;      /* 与正文字号一致 */
+    font-size: 1.15rem;
     line-height: 1.72;
-    margin-bottom: 4px;      /* 列表项之间的微间距 */
+    margin-bottom: 4px;
+    color: var(--t-text-base);
 }
 
-/* 让列表项文字颜色跟随当前章节（默认继承） */
-.section-body li {
-    color: inherit;
+/* ---- Footer ---- */
+.footer {
+    margin-top: 36px;
+    padding-top: 16px;
+    text-align: left;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--t-header);
 }
 
+.footer .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--t-dot);
+    display: inline-block;
+}
+
+/* =========================== 组件 =========================== */
+
+/* ---- Highlight Box ---- */
 .highlight-box {
     padding: 15px 18px;
     margin: 15px 0;
     font-size: 1.06rem;
     line-height: 1.7;
+    color: var(--t-text-strong);
+    background: var(--t-highlight-bg);
+    border-left: 3px solid var(--t-highlight-border);
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    border-left-width: 3px;
-    border-left-style: solid;
 }
 
+/* ---- Sub Heading ---- */
 .sub-heading {
     font-size: 1.55em;
     font-weight: 700;
     margin: 20px 0 7px;
     padding-bottom: 5px;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
+    color: var(--t-subheading-color);
+    border-bottom: 1px solid var(--t-subheading-border);
     letter-spacing: -0.01em;
 }
 
+/* ---- Styled List（罗马数字列表） ---- */
 .styled-list {
     list-style: none;
     padding: 0;
@@ -252,14 +358,18 @@ body {
 
 .styled-list li {
     padding: 9px 0 9px 16px;
-    border-left-width: 2px;
-    border-left-style: solid;
+    border-left: 2px solid var(--t-list-border);
     font-size: 1.06rem;
     display: flex;
     align-items: baseline;
     gap: 10px;
     line-height: 1.6;
+    color: var(--t-list-item-color);
     transition: border-color var(--transition);
+}
+
+.styled-list li:hover {
+    border-left-color: var(--t-list-hover);
 }
 
 .list-marker {
@@ -270,10 +380,12 @@ body {
     height: 20px;
     font-weight: 700;
     font-size: 0.8rem;
+    color: var(--t-list-marker);
     flex-shrink: 0;
     opacity: 0.85;
 }
 
+/* ---- Card Grid ---- */
 .card-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -283,10 +395,15 @@ body {
 
 .mini-card {
     background: #ffffff;
-    border: 1px solid var(--border-light);
+    border: 1px solid var(--t-card-border);
     border-radius: var(--radius);
     padding: 15px 17px;
     transition: border-color var(--transition), background var(--transition);
+}
+
+.mini-card:hover {
+    border-color: var(--t-card-hover-border);
+    background: var(--t-card-hover-bg);
 }
 
 .mini-card .card-label {
@@ -294,71 +411,184 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 600;
+    color: var(--t-card-label);
     margin-bottom: 5px;
 }
 
 .mini-card .card-text {
     font-size: 0.99rem;
     line-height: 1.6;
+    color: var(--t-card-text);
 }
 
+/* ---- Inline Code ---- */
 code {
     font-family: var(--font-mono);
-    background: #eef2f6;
+    background: var(--t-code-bg);
+    color: var(--t-code-color);
     padding: 2px 7px;
     border-radius: 4px;
     font-size: 0.9em;
     font-weight: 500;
 }
 
+/* ---- 代码块 ---- */
 pre {
+    background: var(--t-pre-bg);
+    border: 1px solid var(--t-pre-border);
+    border-radius: 8px;
+    padding: 16px 20px;
     font-family: 'MyCustomFont', var(--font-mono);
-    /* 其他属性保持不变 */
+    font-size: 0.92em;
+    line-height: 1.65;
+    overflow-x: auto;
+    margin: 14px 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--t-pre-color);
 }
 
+/* ---- 简洁表格 ---- */
+.simple-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.95rem;
+}
+
+.simple-table th {
+    background: var(--t-table-th-bg);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--t-table-border);
+    color: var(--t-text-strong);
+}
+
+.simple-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--t-table-border);
+    color: var(--t-text-base);
+}
+
+/* ---- Mermaid ---- */
+.mermaid {
+    background: var(--t-mermaid-bg);
+    border: 1px solid var(--t-mermaid-border);
+    border-radius: 10px;
+    padding: 24px 20px;
+    margin: 20px 0;
+    overflow-x: auto;
+    font-family: 'MyCustomFont', 'Inter', sans-serif;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+/* Mermaid SVG 内部元素 */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon {
+    fill: var(--t-node-fill) !important;
+    stroke: var(--t-accent) !important;
+    stroke-width: 1.5px;
+}
+/* sequenceDiagram 的演员条 */
+.mermaid .actor rect,
+.mermaid .actor-top rect,
+.mermaid .actor-bottom rect {
+    fill: var(--t-node-fill) !important;
+    stroke: var(--t-accent) !important;
+}
+.mermaid .node rect {
+    rx: 10px;
+    ry: 10px;
+}
+.mermaid .node:hover rect,
+.mermaid .node:hover circle,
+.mermaid .node:hover polygon {
+    fill: var(--t-code-bg) !important;
+    stroke: var(--t-accent-strong) !important;
+}
+/* 节点内文字 */
+.mermaid .nodeLabel,
+.mermaid .node span,
+.mermaid .node div {
+    color: var(--t-text-strong) !important;
+    fill: var(--t-text-strong) !important;
+}
+/* 子图/cluster */
+.mermaid .cluster rect {
+    fill: none;
+    stroke: var(--t-section-border);
+    stroke-width: 1px;
+    stroke-dasharray: 4 2;
+}
+.mermaid .cluster span,
+.mermaid .cluster div {
+    color: var(--t-text-strong) !important;
+}
+/* 备注/note */
+.mermaid .note rect {
+    fill: var(--t-highlight-bg);
+    stroke: var(--t-highlight-border);
+}
+.mermaid .note span {
+    color: var(--t-text-strong) !important;
+}
+
+/* ---- Bold ---- */
 strong {
     font-weight: 600;
+    color: var(--t-strong-color);
 }
 
+/* ---- Horizontal Rule ---- */
 .divider {
     border: none;
     border-top: 1px solid var(--border);
     margin: 18px 0;
 }
 
-.footer {
-    margin-top: 36px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-    text-align: left;
-    font-size: 0.88rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #2876ddde;
+/* =========================== 响应式 =========================== */
+@media (max-width: 640px) {
+    body {
+        font-size: 16px;
+        padding: 20px 12px 40px;
+    }
+    .container {
+        padding: 24px 16px;
+        border-radius: var(--radius-lg);
+    }
+    .header h1 { font-size: 1.9rem; }
+    .section-header { padding: 18px 16px 0; }
+    .section-body { padding: 10px 16px 18px; }
+    .section-title-group h2 { font-size: 1.2rem; }
+    .section-body p { font-size: 0.96rem; }
+    .highlight-box { font-size: 0.9rem; padding: 12px 14px; }
+    .sub-heading { font-size: 0.98rem; }
+    .styled-list li { font-size: 0.9rem; padding: 7px 0 7px 12px; }
+    .mini-card .card-text { font-size: 0.88rem; }
+    .card-grid { grid-template-columns: 1fr; gap: 8px; }
 }
 
-.footer .dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background-color: #a5d6a7;
-    display: inline-block;
+/* =========================== 打印 =========================== */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .section-number {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-shadow: inset 0 0 0 30px var(--t-accent) !important;
+        color: #ffffff !important;
+    }
 }
 
-
-.mermaid {
-    background: #ffffff;
-    border: 1px solid #d0e2fa;
-    border-radius: 10px;
-    padding: 24px 20px;
-    margin: 20px 0;
-    overflow-x: auto;
-    font-family: 'MyCustomFont', 'Inter', sans-serif;
-}
-
-/* ========== 章节个性化覆盖 ========== */
-/* 以下所有 .section-number 均添加了打印色彩保留属性 */
+/* ==========================================================================
+   以下保留旧版 sec1~sec10 主题，供需要多色混排的页面使用。
+   在加了 t-xxx 主题类的页面上，建议直接使用 class="section" 而非 secX。
+   ========================================================================== */
 
 /* ---- 章节1 · 绿色调 ---- */
 .sec1 .section-number { background: #2E7D32; }
@@ -367,7 +597,7 @@ strong {
 .sec1 .section-title-group h2 { color: #1b3a1b; }
 .sec1 .section-eng { color: #4a6b4a; }
 .sec1 .section-body p { color: #2d4f2d; }
-.sec1 .highlight-box { border-left-color: #a5d6a7; color: #1b3a1b; }
+.sec1 .highlight-box { border-left-color: #a5d6a7; color: #1b3a1b; background: #f8fdf9; border-left: 3px solid #a5d6a7; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec1 .sub-heading { border-bottom-color: #d4e8d8; color: #1b3a1b; }
 .sec1 .styled-list li { border-left-color: #d4e8d8; color: #2d4f2d; }
 .sec1 .styled-list li:hover { border-left-color: #a5d6a7; }
@@ -386,7 +616,7 @@ strong {
 .sec2 .section-title-group h2 { color: #5a2c00; }
 .sec2 .section-eng { color: #9e5800; }
 .sec2 .section-body p { color: #7a3f00; }
-.sec2 .highlight-box { border-left-color: #ffcc80; color: #5a2c00; }
+.sec2 .highlight-box { border-left-color: #ffcc80; color: #5a2c00; background: #fffcf7; border-left: 3px solid #ffcc80; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec2 .sub-heading { border-bottom-color: #f5e2cc; color: #5a2c00; }
 .sec2 .styled-list li { border-left-color: #f5e2cc; color: #7a3f00; }
 .sec2 .styled-list li:hover { border-left-color: #ffcc80; }
@@ -405,7 +635,7 @@ strong {
 .sec3 .section-title-group h2 { color: #2d0845; }
 .sec3 .section-eng { color: #6e3a8c; }
 .sec3 .section-body p { color: #4a1a6b; }
-.sec3 .highlight-box { border-left-color: #ce93d8; color: #2d0845; }
+.sec3 .highlight-box { border-left-color: #ce93d8; color: #2d0845; background: #fdf9fe; border-left: 3px solid #ce93d8; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec3 .sub-heading { border-bottom-color: #e9d9f0; color: #2d0845; }
 .sec3 .styled-list li { border-left-color: #e9d9f0; color: #4a1a6b; }
 .sec3 .styled-list li:hover { border-left-color: #ce93d8; }
@@ -424,7 +654,7 @@ strong {
 .sec4 .section-title-group h2 { color: #33440d; }
 .sec4 .section-eng { color: #5a6e20; }
 .sec4 .section-body p { color: #3d5010; }
-.sec4 .highlight-box { border-left-color: #dce775; color: #26330a; }
+.sec4 .highlight-box { border-left-color: #dce775; color: #26330a; background: #fefef9; border-left: 3px solid #dce775; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec4 .sub-heading { border-bottom-color: #e3e6c4; color: #26330a; }
 .sec4 .styled-list li { border-left-color: #e3e6c4; color: #3d5010; }
 .sec4 .styled-list li:hover { border-left-color: #dce775; }
@@ -443,7 +673,7 @@ strong {
 .sec5 .section-title-group h2 { color: #002b2e; }
 .sec5 .section-eng { color: #1a6b70; }
 .sec5 .section-body p { color: #00454a; }
-.sec5 .highlight-box { border-left-color: #80deea; color: #002b2e; }
+.sec5 .highlight-box { border-left-color: #80deea; color: #002b2e; background: #f9fefe; border-left: 3px solid #80deea; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec5 .sub-heading { border-bottom-color: #d2eef3; color: #002b2e; }
 .sec5 .styled-list li { border-left-color: #d2eef3; color: #00454a; }
 .sec5 .styled-list li:hover { border-left-color: #80deea; }
@@ -462,7 +692,7 @@ strong {
 .sec6 .section-title-group h2 { color: #3d001f; }
 .sec6 .section-eng { color: #802d4d; }
 .sec6 .section-body p { color: #5e1035; }
-.sec6 .highlight-box { border-left-color: #f48fb1; color: #3d001f; }
+.sec6 .highlight-box { border-left-color: #f48fb1; color: #3d001f; background: #fff9fa; border-left: 3px solid #f48fb1; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec6 .sub-heading { border-bottom-color: #f8d8e1; color: #3d001f; }
 .sec6 .styled-list li { border-left-color: #f8d8e1; color: #5e1035; }
 .sec6 .styled-list li:hover { border-left-color: #f48fb1; }
@@ -481,7 +711,7 @@ strong {
 .sec7 .section-title-group h2 { color: #0f3174; }
 .sec7 .section-eng { color: #2b5599; }
 .sec7 .section-body p { color: #14366b; }
-.sec7 .highlight-box { border-left-color: #7eb3f7; color: #0f3174; }
+.sec7 .highlight-box { border-left-color: #7eb3f7; color: #0f3174; background: #f8fbff; border-left: 3px solid #7eb3f7; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec7 .sub-heading { border-bottom-color: #d0e2fa; color: #0f3174; }
 .sec7 .styled-list li { border-left-color: #d0e2fa; color: #14366b; }
 .sec7 .styled-list li:hover { border-left-color: #7eb3f7; }
@@ -493,14 +723,14 @@ strong {
 .sec7 code { color: #0f4da0; background: #e8f1fd; }
 .sec7 strong { color: #0f3174; }
 
-/* ---- 章节8 · 暖杏色调（强调 #FFD3A5） ---- */
+/* ---- 章节8 · 暖杏色调 ---- */
 .sec8 .section-number { background: #FFD3A5; color: #ffffff; }
 .sec8 { background: #ffffff; border-color: #ffe4cc; }
 .sec8:hover { border-color: #ffc899; }
 .sec8 .section-title-group h2 { color: #5c3b1f; }
 .sec8 .section-eng { color: #8a5a35; }
 .sec8 .section-body p { color: #6b4427; }
-.sec8 .highlight-box { border-left-color: #FFD3A5; color: #5c3b1f; }
+.sec8 .highlight-box { border-left-color: #FFD3A5; color: #5c3b1f; background: #fffaf5; border-left: 3px solid #FFD3A5; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec8 .sub-heading { border-bottom-color: #ffe4cc; color: #5c3b1f; }
 .sec8 .styled-list li { border-left-color: #ffe4cc; color: #6b4427; }
 .sec8 .styled-list li:hover { border-left-color: #FFD3A5; }
@@ -512,15 +742,14 @@ strong {
 .sec8 code { color: #5c3b1f; background: #fff0e0; }
 .sec8 strong { color: #5c3b1f; }
 
-/* ---- 章节9 · 冰青色调（强调 #65FDF0） ---- */
-/* 注意：白色数字在亮色背景上可能对比度不足，可考虑将文字颜色改为深色 (如 #003d3b) 以获得更好可读性 */
+/* ---- 章节9 · 冰青色调 ---- */
 .sec9 .section-number { background: #65FDF0; color: #ffffff; }
 .sec9 { background: #ffffff; border-color: #cafaf6; }
 .sec9:hover { border-color: #8ff5ec; }
 .sec9 .section-title-group h2 { color: #003d3b; }
 .sec9 .section-eng { color: #006b66; }
 .sec9 .section-body p { color: #004f4b; }
-.sec9 .highlight-box { border-left-color: #65FDF0; color: #003d3b; }
+.sec9 .highlight-box { border-left-color: #65FDF0; color: #003d3b; background: #f5fffe; border-left: 3px solid #65FDF0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec9 .sub-heading { border-bottom-color: #cafaf6; color: #003d3b; }
 .sec9 .styled-list li { border-left-color: #cafaf6; color: #004f4b; }
 .sec9 .styled-list li:hover { border-left-color: #65FDF0; }
@@ -532,14 +761,14 @@ strong {
 .sec9 code { color: #003d3b; background: #e0fffc; }
 .sec9 strong { color: #003d3b; }
 
-/* ---- 章节10 · 柔粉色调（强调 #FAB2FF） ---- */
+/* ---- 章节10 · 柔粉色调 ---- */
 .sec10 .section-number { background: #FAB2FF; color: #ffffff; }
 .sec10 { background: #ffffff; border-color: #fdd6ff; }
 .sec10:hover { border-color: #f9b0ff; }
 .sec10 .section-title-group h2 { color: #4a005c; }
 .sec10 .section-eng { color: #711f82; }
 .sec10 .section-body p { color: #5c0070; }
-.sec10 .highlight-box { border-left-color: #FAB2FF; color: #4a005c; }
+.sec10 .highlight-box { border-left-color: #FAB2FF; color: #4a005c; background: #fef5ff; border-left: 3px solid #FAB2FF; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .sec10 .sub-heading { border-bottom-color: #fdd6ff; color: #4a005c; }
 .sec10 .styled-list li { border-left-color: #fdd6ff; color: #5c0070; }
 .sec10 .styled-list li:hover { border-left-color: #FAB2FF; }
@@ -550,112 +779,3 @@ strong {
 .sec10 .mini-card .card-text { color: #5c0070; }
 .sec10 code { color: #4a005c; background: #fae6ff; }
 .sec10 strong { color: #4a005c; }
-
-/* ========== 响应式 ========== */
-@media (max-width: 640px) {
-    body {
-        font-size: 16px;
-        padding: 20px 12px 40px;
-    }
-    .container {
-        padding: 24px 16px;
-        border-radius: var(--radius-lg);
-    }
-    .header h1 {
-        font-size: 1.9rem;
-    }
-    .section-header {
-        padding: 18px 16px 0;
-    }
-    .section-body {
-        padding: 10px 16px 18px;
-    }
-    .section-title-group h2 {
-        font-size: 1.2rem;
-    }
-    .section-body p {
-        font-size: 0.96rem;
-    }
-    .highlight-box {
-        font-size: 0.9rem;
-        padding: 12px 14px;
-    }
-    .sub-heading {
-        font-size: 0.98rem;
-    }
-    .styled-list li {
-        font-size: 0.9rem;
-        padding: 7px 0 7px 12px;
-    }
-    .mini-card .card-text {
-        font-size: 0.88rem;
-    }
-    .card-grid {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
-}
-
-/* ========== 打印/PDF 强制保留色彩 ========== */
-@media print {
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-    }
-    .section-number {
-        background: inherit !important;
-        color: inherit !important;
-    }
-}
-
-/* 打印时强制显示 .section-number 的背景色（使用 box-shadow 模拟） */
-@media print {
-    .section-number {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    /* 针对每个章节写死背景色，用 box-shadow 代替 background */
-    .sec1 .section-number {
-        box-shadow: inset 0 0 0 30px #2E7D32 !important;
-        color: #ffffff !important;
-    }
-    .sec2 .section-number {
-        box-shadow: inset 0 0 0 30px #E65100 !important;
-        color: #ffffff !important;
-    }
-    .sec3 .section-number {
-        box-shadow: inset 0 0 0 30px #6A1B9A !important;
-        color: #ffffff !important;
-    }
-    .sec4 .section-number {
-        box-shadow: inset 0 0 0 30px #558B2F !important;
-        color: #ffffff !important;
-    }
-    .sec5 .section-number {
-        box-shadow: inset 0 0 0 30px #006064 !important;
-        color: #ffffff !important;
-    }
-    .sec6 .section-number {
-        box-shadow: inset 0 0 0 30px #880E4F !important;
-        color: #ffffff !important;
-    }
-    .sec7 .section-number {
-        box-shadow: inset 0 0 0 30px #1273eb !important;
-        color: #ffffff !important;
-    }
-    .sec8 .section-number {
-        box-shadow: inset 0 0 0 30px #FFD3A5 !important;
-        color: #ffffff !important;
-    }
-    .sec9 .section-number {
-        box-shadow: inset 0 0 0 30px #65FDF0 !important;
-        color: #ffffff !important;
-    }
-    .sec10 .section-number {
-        box-shadow: inset 0 0 0 30px #FAB2FF !important;
-        color: #ffffff !important;
-    }
-}
-
