@@ -91,6 +91,7 @@ body {
   width: 100%;
   height: 100vh;
   background: var(--bg);
+  border: 3px solid var(--border);
 }
 
 /* ─── 全局滚动条（brutalist 风格） ─── */

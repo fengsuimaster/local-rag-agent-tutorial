@@ -23,7 +23,6 @@
                 <span class="section-number">1</span>
                 <div class="section-title-group">
                     <h2>整体架构</h2>
-                    <span class="section-eng">Architecture Overview</span>
                 </div>
             </div>
             <div class="section-body">
@@ -83,7 +82,6 @@
                 <span class="section-number">2</span>
                 <div class="section-title-group">
                     <h2>配置与环境</h2>
-                    <span class="section-eng">Configuration &amp; Environment</span>
                 </div>
             </div>
             <div class="section-body">
@@ -118,7 +116,6 @@ export const MAX_TOKENS = 8192;          // Agent 单次回复最大 token</pre>
                 <span class="section-number">3</span>
                 <div class="section-title-group">
                     <h2>系统提示词</h2>
-                    <span class="section-eng">System Prompt</span>
                 </div>
             </div>
             <div class="section-body">
@@ -193,7 +190,6 @@ export const MAX_TOKENS = 8192;          // Agent 单次回复最大 token</pre>
                 <span class="section-number">4</span>
                 <div class="section-title-group">
                     <h2>Claude Agent SDK 集成</h2>
-                    <span class="section-eng">Claude Agent SDK Integration</span>
                 </div>
             </div>
             <div class="section-body">
@@ -234,13 +230,12 @@ async function getAgentSdk() {
                 <span class="section-number">5</span>
                 <div class="section-title-group">
                     <h2>前端聊天界面</h2>
-                    <span class="section-eng">Frontend Chat Interface</span>
                 </div>
             </div>
             <div class="section-body">
                 <p>前端采用<strong>零框架</strong>方案——纯 HTML + CSS + Vanilla JavaScript，不引入 React、Vue 等前端框架。对于一个聊天界面而言，交互模式相对固定，Vanilla JS 足以胜任，且省去了构建工具链的复杂度。</p>
                 <h3 class="sub-heading">界面结构</h3>
-                <p>![前端页面](../images/前端页面.png)</p>
+                <p><img src="../images/前端页面.png" alt="前端页面" style="max-width: 100%; border-radius: 8px;" /></p>
                 <h3 class="sub-heading">消息渲染</h3>
                 <p>用户消息以纯文本展示，助手消息通过 <strong>Marked</strong> 库渲染为富文本。渲染管线集成了三种格式增强：</p>
                 <ul>
@@ -259,7 +254,6 @@ async function getAgentSdk() {
                 <span class="section-number">6</span>
                 <div class="section-title-group">
                     <h2>消息数据持久化</h2>
-                    <span class="section-eng">Message Persistence</span>
                 </div>
             </div>
             <div class="section-body">
@@ -301,7 +295,6 @@ async function getAgentSdk() {
                 <span class="section-number">7</span>
                 <div class="section-title-group">
                     <h2>完整请求生命周期</h2>
-                    <span class="section-eng">Complete Request Lifecycle</span>
                 </div>
             </div>
             <div class="section-body">

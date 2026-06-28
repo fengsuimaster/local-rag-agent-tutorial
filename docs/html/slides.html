@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>三省六部制 · AI团队权力架构</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fefbf5; /* 原背景卡片的底色 */
+            font-family: 'Noto Serif SC', 'Times New Roman', '宋体', '仿宋', '华文楷体', '楷体', 'KaiTi', '华文宋体', 'Songti SC', '宋体-简', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 35px 25px;
+            margin: 0;
+        }
+
+        .wrapper {
+            max-width: 1400px;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            letter-spacing: 8px;
+            color: #4d3a2c;
+            text-shadow: 2px 2px 0 rgba(200, 170, 120, 0.15);
+            margin-bottom: 6px;
+            line-height: 1.2;
+            position: relative;
+            display: inline-block;
+            padding: 0 30px;
+        }
+
+        .header h1::before,
+        .header h1::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #b4976e, transparent);
+        }
+
+        .header h1::before {
+            left: -50px;
+        }
+        .header h1::after {
+            right: -50px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            color: #7f6b58;
+            letter-spacing: 4px;
+            font-style: italic;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        /* ===== 树形结构 ===== */
+        .tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 950px;
+            margin-top: -80px;
+        }
+
+        .tree ul {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 35px;
+            position: relative;
+            list-style: none;
+            flex-wrap: nowrap;
+        }
+
+        .tree li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            padding: 35px 10px 0 10px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        /* 卡片通用样式 */
+        .card {
+            background: #fefcf7;
+            border: 1px solid #dac09a;
+            border-radius: 24px;
+            padding: 14px 16px;
+            min-width: 130px;
+            box-shadow: 0 12px 28px -10px rgba(100, 70, 30, 0.12), 0 0 0 1px rgba(230, 200, 150, 0.4);
+            transition: all 0.25s ease;
+            background: linear-gradient(145deg, #fffef9 0%, #f9f3e8 100%);
+            cursor: default;
+            position: relative;
+            z-index: 2;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        a.card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        a.card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 35px -12px rgba(130, 90, 40, 0.25), 0 0 0 2px #c9a96b;
+            border-color: #b4945a;
+        }
+
+        .card .role-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4c3a28;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+            border-bottom: 1px dashed #d1b88c;
+            padding-bottom: 5px;
+        }
+
+        .card .role-sub {
+            font-size: 0.8rem;
+            color: #7b6242;
+            font-weight: 400;
+            letter-spacing: 1px;
+            line-height: 1.3;
+            display: block;
+        }
+
+        .card .role-desc {
+            font-size: 0.8rem;
+            color: #774b1b;
+            margin-top: 5px;
+            font-style: italic;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        /* 皇帝卡片 */
+        .emperor-card {
+            min-width: 300px;
+            padding: 20px 30px;
+            background: linear-gradient(145deg, #fdf5e1 0%, #f7e5c2 100%);
+            border-color: #c8a16b;
+            box-shadow: 0 18px 36px -10px rgba(130, 80, 20, 0.25), 0 0 0 2px rgba(210, 160, 80, 0.5);
+        }
+
+        .emperor-card .role-title {
+            font-size: 1.8rem;
+            letter-spacing: 6px;
+            color: #3e2e1c;
+        }
+
+        .emperor-card .role-sub {
+            font-size: 1.3rem;
+        }
+
+        .emperor-card .role-desc {
+            font-size: 0.95rem;
+        }
+
+        /* 三省卡片 */
+        .sansheng-card {
+            min-width: 170px;
+            padding: 16px 18px;
+        }
+
+        .sansheng-card .role-title {
+            font-size: 1.4rem;
+        }
+
+        .sansheng-card .role-sub {
+            font-size: 0.9rem;
+        }
+
+        .sansheng-card .role-desc {
+            font-size: 0.88rem;
+        }
+
+        /* 六部卡片 */
+        .ministry-card {
+            min-width: 140px;
+            padding: 10px 8px;
+        }
+
+        .ministry-card .role-title {
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+        }
+
+        .ministry-card .role-sub {
+            font-size: 0.9rem;
+        }
+
+        .ministry-card .role-desc {
+            font-size: 0.85rem;
+        }
+
+        /* ===== 连接线 ===== */
+        .tree ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 0;
+            height: 35px;
+            border-left: 2px solid #b4946e;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .tree > ul::before {
+            display: none;
+        }
+
+        .tree li {
+            background: linear-gradient(to bottom, #b4946e 0%, #b4946e 35px, transparent 35px) no-repeat center top;
+            background-size: 2px 35px;
+        }
+
+        .tree > ul > li {
+            background: none;
+        }
+
+        .tree li::before,
+        .tree li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            height: 35px;
+            border-top: 2px solid #b4946e;
+            z-index: 1;
+        }
+
+        .tree li::before {
+            left: 50%;
+            width: 50%;
+        }
+
+        .tree li::after {
+            right: 50%;
+            width: 50%;
+        }
+
+        .tree li:first-child::after {
+            border-top: none;
+        }
+
+        .tree li:last-child::before {
+            border-top: none;
+        }
+
+        .tree li:only-child::before,
+        .tree li:only-child::after {
+            width: 50%;
+            border-top: 2px solid #b4946e;
+        }
+
+        .tree li:only-child::after {
+            right: 50%;
+        }
+        .tree li:only-child::before {
+            left: 50%;
+        }
+
+        .tree > ul > li:only-child::before,
+        .tree > ul > li:only-child::after {
+            border-top: none;
+        }
+
+        .tree ul ul li {
+            background: linear-gradient(to bottom, #b4946e 0%, #b4946e 35px, transparent 35px) no-repeat center top;
+            background-size: 2px 35px;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.85rem;
+            color: #a3927a;
+            letter-spacing: 3px;
+            border-top: 1px dashed #dac09a;
+            padding-top: 20px;
+            opacity: 0.7;
+            width: 100%;
+        }
+
+        ::selection {
+            background: #dac09a;
+            color: #2d2416;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <h1>三省六部</h1>
+            <div class="subtitle">AI 协 作 权 力 架 构</div>
+        </div>
+
+        <div class="tree">
+            <ul>
+                <li>
+                    <a class="card emperor-card" href="#" title="最高决策者 · 你">
+                        <span class="role-title">皇 帝</span>
+                        <span class="role-sub">最高决策者</span>
+                        <span class="role-desc">定战略 · 掌赏罚</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a class="card sansheng-card" href="#" title="中书省 · 起草创意">
+                                <span class="role-title">中 书 省</span>
+                                <span class="role-sub">决策起草</span>
+                                <span class="role-desc">负责将皇帝的模糊构想转化为具体、可执行的诏令草案。专司发散、提案与初稿输出，以充沛的文思铺陈出各种可能性，供门下省审视。</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="card sansheng-card" href="#" title="门下省 · 审核封驳">
+                                <span class="role-title">门 下 省</span>
+                                <span class="role-sub">审核封驳</span>
+                                <span class="role-desc">对中书省的每一道政令进行严格审查，挑剔逻辑漏洞，打磨言辞锋芒，评估潜在风险。唯有经其盖章通过的方案，方可流入执行环节。</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="card sansheng-card" href="#" title="尚书省 · 执行落地">
+                                <span class="role-title">尚 书 省</span>
+                                <span class="role-sub">执行落地</span>
+                                <span class="role-desc">它不质疑决策，只专注于将审核通过的诏令拆解为具体任务，协调六部资源</span>
+                            </a>
+                            <ul>
+                                <li>
+                                    <a class="card ministry-card" href="#" title="吏部 · 人物设定">
+                                        <span class="role-title">吏 部</span>
+                                        <span class="role-sub">人物 / 角色</span>
+                                        <span class="role-desc">在 AI 团队中，负责构建、管理虚拟角色的人物设定，为不同场景分配合适的“数字官员”</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="card ministry-card" href="#" title="户部 · 数据分析">
+                                        <span class="role-title">户 部</span>
+                                        <span class="role-sub">财政 / 数据</span>
+                                        <span class="role-desc">进行市场调研、财务建模、用户统计，以精准的数字洞察为决策提供养料，是团队的账房与情报库。</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="card ministry-card" href="#" title="礼部 · 文案修辞">
+                                        <span class="role-title">礼 部</span>
+                                        <span class="role-sub">礼仪 / 文案</span>
+                                        <span class="role-desc">负责文案润色、品牌修辞、格式排版与对外沟通，确保一切输出合乎礼制、彰显格调，传递出统一而雅正的声音。</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="card ministry-card" href="#" title="兵部 · 竞争分析">
+                                        <span class="role-title">兵 部</span>
+                                        <span class="role-sub">兵事 / 对抗</span>
+                                        <span class="role-desc">执掌兵械与军事策略。在协作中化身为竞争分析、策略推演与红蓝对抗的引擎，为方案寻找破绽，为前路预演攻防。</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="card ministry-card" href="#" title="刑部 · 合规审查">
+                                        <span class="role-title">刑 部</span>
+                                        <span class="role-sub">法律 / 审核</span>
+                                        <span class="role-desc">负责合同的条款审查、内容的合规审核、代码的除错与安全扫描，为团队划定不可逾越的边界，防患于未然。</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="card ministry-card" href="#" title="工部 · 技术执行">
+                                        <span class="role-title">工 部</span>
+                                        <span class="role-sub">工程 / 技术</span>
+                                        <span class="role-desc">掌握代码编写、自动化工作流搭建、工具维护与图像生成等技术营造，将纸上蓝图变为可运转的数字工程，是团队的工匠与建造师。</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="footer-note">
+            决策流水线 · 程序正义 · 智力接力
+        </div>
+    </div>
+</body>
+</html>
